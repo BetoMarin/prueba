@@ -452,6 +452,9 @@ all_table <- table(survey_inc$predictions)+table(survey$brand)
 pie(all_table, labels = c("Acer", "Sony"), main="Brand preferences")
 
 #ESTO ES UNA PRUEBA PARA VER SI LOS CAMBIOS QUE HACEMOS LOS VE TAMBIEN GITKRAKEN Y DESPUES GITHUB
+HOLA QUE TAL
+
+
 
 
 
