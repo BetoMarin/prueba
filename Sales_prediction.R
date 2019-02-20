@@ -4,7 +4,8 @@ library(randomForest)
 library(caret)
 library(corrplot)
 library(dplyr)
-
+library(rpart)
+library(rpart.plot)
 
 setwd("~/Google Drive/DATA ANALYSTICS/REVISIÓN/prueba")
 sales <- read.table("existingproductattributes2017.2 (1).csv", sep=",", header=TRUE)
@@ -42,6 +43,15 @@ sales_with_dummy_sin_outliers <- sales_with_dummy %>%
   filter(Volume < 6000)
 
 sales_with_dummy <- sales_with_dummy_sin_outliers
+
+names(sales)
+salesrpart <- sales
+
+salesrpart$x5StarReviews <- NULL
+
+
+treesales <- rpart(Volume~., data=salesrpart, cp=0.001)
+rpart.plot(treesales)
 
 sales_with_dummy <- cor(sales_with_dummy)
 corrplot(sales_with_dummy, method = "number", number.cex= 15/ncol(sales_with_dummy), title = "Correlation Matrix", tl.cex = 0.5, type = "upper",tl.col = "blue2")
@@ -121,6 +131,42 @@ newproducts$rfprednewproducts <- rfprednewproducts
 sales_new_products <- data.frame(cbind(sales_new_products, rfprednewproducts))
 
 View(sales_new_products)
+
+### solo con 4stars and positive
+
+salesrpart$ProductType <- NULL
+salesrpart$ProductNum <- NULL
+salesrpart$Price <- NULL
+salesrpart$x3StarReviews <- NULL
+salesrpart$x2StarReviews <- NULL
+salesrpart$x1StarReviews  <- NULL
+salesrpart$NegativeServiceReview  <- NULL
+salesrpart$Recommendproduct  <- NULL
+salesrpart$BestSellersRank  <- NULL
+salesrpart$ProductDepth  <- NULL
+salesrpart$ShippingWeight  <- NULL
+salesrpart$ProductWidth  <- NULL
+salesrpart$ProductHeight  <- NULL
+salesrpart$ProfitMargin  <- NULL
+
+set.seed(123)
+trainIndex <- createDataPartition(salesrpart$Volume, p = .80, list = FALSE)
+
+salesrpartTrain <- salesrpart[ trainIndex,]
+salesrpartTest  <- salesrpart[-trainIndex,]
+
+set.seed(123)
+
+system.time(rfsalesrpart <- randomForest(Volume ~ ., salesrpartTrain, ntree=350))
+
+rfpredsalesrpart <- predict(rfsalesrpart, newdata = salesrpartTest)
+
+rfpredsalesrpart
+
+salesrpartTest$rfpredsalesrpart <- rfpredsalesrpart
+
+postResample(rfpredsalesrpart, salesrpartTest$Volume)
+
 
 
 
